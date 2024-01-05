@@ -1,13 +1,10 @@
 import './App.css'
+import Home from './page/Home'
 
 function App() {
   return (
     <>
-      <div>
-        <span className="material-symbols-outlined">
-          done
-        </span>
-      </div>
+      <Home />
     </>
   )
 }
