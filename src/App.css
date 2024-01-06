@@ -44,3 +44,17 @@
 .pointer {
   cursor: pointer;
 }
+
+.nav-tabs .nav-link {
+  background-color: transparent !important;
+  color: #FFFFFF !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+
+.nav-tabs .nav-link.active {
+  border-bottom: solid 4px white !important;
+}
+
+/* #A56EB5 */

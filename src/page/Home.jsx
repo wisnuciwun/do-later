@@ -4,45 +4,65 @@ import { changeTodosData } from '../global/features/todoSlice';
 import { useRef, useState } from 'react';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
-
+import moment from 'moment';
+import { ToastContainer, toast } from 'react-toastify';
 
 const Home = () => {
+  const notify = (text = 'Success') => toast(text, {
+    position: "top-right",
+    autoClose: 3000,
+    hideProgressBar: true,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: false,
+    theme: "light",
+  });;
   const dispatch = useDispatch()
   const todos = useSelector((state) => state.todoReducer.todos)
   const [title, settitle] = useState('')
   const [description, setdescription] = useState('')
+  const [idEdit, setidEdit] = useState(null)
   const [titleButtonRight, settitleButtonRight] = useState('Create new')
   const [activeTab, setactiveTab] = useState('todo-lists')
 
   const handleClick = (e) => {
     e.preventDefault()
-    let value = {
-      title: title,
-      description: description
+
+    if (titleButtonRight == 'Edit todo') {
+      onHandleEdit()
+    } else {
+      let value = {
+        title: title,
+        description: description,
+        date: moment().format('DD MMM YYYY HH:mm:ss')
+      }
+      settitleButtonRight('Create new')
+      settitle('')
+      setdescription('')
+      dispatch(changeTodosData([...todos, value]))
+      notify('You have successfully add a todo')
     }
-    settitleButtonRight('Create new')
-    settitle('')
-    setdescription('')
-    dispatch(changeTodosData([...todos, value]))
   }
 
-  const onHandleDelete = (id) => {
+  const onHandleDelete = (index) => {
     let newArray = [...todos];
-    newArray.splice(id, 1)
+    newArray.splice(index, 1)
     dispatch(changeTodosData(newArray))
+    notify('You have successfully remove the todo')
   }
 
-  const onHandleEdit = (id) => {
+  const onHandleEdit = () => {
     let newData = {
       title: title,
-      description: description
+      description: description,
+      date: moment().format('DD MMM YYYY HH:mm:ss')
     }
-    newArray = [...todos]
-    newArray[id] = newData
+    let newArray = [...todos]
+    newArray[idEdit] = newData
     dispatch(changeTodosData(newArray))
+    notify('You have successfully changes the todo')
   }
-
-  console.log('fff', todos)
 
   return (
     <div>
@@ -60,31 +80,35 @@ const Home = () => {
         <Tabs
           defaultActiveKey="todo-lists"
           id="uncontrolled-tab-example"
-          className="mb-3"
+          className="mb-3 customTab"
           fill
           activeKey={activeTab}
           onSelect={(key) => setactiveTab(key)}
         >
           <Tab eventKey="todo-lists" className='text-light w-100' title="Todos">
-            <div style={{ height: '400px' }}>
-              <Accordion defaultActiveKey={0}>
+            <div style={{ height: '400px', overflowY: 'auto' }}>
+              <Accordion>
                 {
                   todos.length != 0 ?
                     todos.map((v, index) => {
                       return (
                         <Accordion.Item className='mb-2' eventKey={index}>
                           <Accordion.Header>
-                            {v.title}
-                          </Accordion.Header>
-                          <Accordion.Body className='d-flex justify-content-between'>
-                            {v.description}
                             <div>
+                              {v.title}
+                              <div style={{ fontSize: '10px' }} className='text-muted mt-1'>{v?.date}</div>
+                            </div>
+                          </Accordion.Header>
+                          <Accordion.Body className='d-block text-start'>
+                            {v.description}
+                            <div className='text-end'>
                               <span
                                 onClick={() => {
                                   settitle(v.title)
                                   setdescription(v.description)
                                   setactiveTab('new-todo')
                                   settitleButtonRight(("Edit todo"))
+                                  setidEdit(index)
                                 }}
                                 className="material-symbols-outlined pointer">
                                 edit
@@ -112,12 +136,35 @@ const Home = () => {
                 <div className='text-right'>
                   <FormControl required value={title} onChange={(e) => settitle(e.target.value)} className='mb-2' placeholder='Write your task title' />
                   <FormControl required value={description} onChange={(e) => setdescription(e.target.value)} className='mb-3' as='textarea' style={{ height: '290px' }} placeholder='Tell your task description' />
-                  <Button type="submit" className='w-100 mb-1'>Save todo</Button>
+                  <div className='d-flex gap-2'>
+                    {
+                      titleButtonRight == 'Edit todo' &&
+                      <Button onClick={() => {
+                        settitleButtonRight('Create new')
+                        settitle('')
+                        setdescription('')
+                      }} variant='light' className='w-100 mb-1'>Cancel</Button>
+                    }
+                    <Button type="submit" className='w-100 mb-1 btn-primary'>Save todo</Button>
+                  </div>
                 </div>
               </form>
             </div>
           </Tab>
         </Tabs>
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          className='text-start'
+          closeButton={false}
+          draggable
+          pauseOnHover
+        />
       </Container>
     </div >
   )
