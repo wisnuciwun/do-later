@@ -35,7 +35,8 @@ const Home = () => {
       let value = {
         title: title,
         description: description,
-        date: moment().format('DD MMM YYYY HH:mm:ss')
+        date: moment().format('DD MMM YYYY HH:mm:ss'),
+        finished: false
       }
       settitleButtonRight('Create new')
       settitle('')
@@ -56,12 +57,21 @@ const Home = () => {
     let newData = {
       title: title,
       description: description,
-      date: moment().format('DD MMM YYYY HH:mm:ss')
+      date: moment().format('DD MMM YYYY HH:mm:ss'),
+      finished: false
     }
     let newArray = [...todos]
     newArray[idEdit] = newData
     dispatch(changeTodosData(newArray))
     notify('You have successfully changes the todo')
+  }
+
+  const onHandleFinishTask = (v, id) => {
+    let newData = { ...v, finished: !v.finished }
+    let newArray = [...todos]
+    newArray[id] = newData
+    dispatch(changeTodosData(newArray))
+    notify(!v.finished ? 'You have successfully finished the todo' : 'You undo your task')
   }
 
   return (
@@ -94,14 +104,40 @@ const Home = () => {
                       return (
                         <Accordion.Item className='mb-2' eventKey={index}>
                           <Accordion.Header>
-                            <div>
-                              {v.title}
-                              <div style={{ fontSize: '10px' }} className='text-muted mt-1'>{v?.date}</div>
+                            <div className='d-flex gap-4 align-items-center'>
+                              <div className={`round-div ${v.finished ? 'bg-success finished' : 'bg-warning'} d-flex align-items-center justify-content-center`}>
+                                {
+                                  v.finished ?
+                                    <span className="material-symbols-outlined text-white">
+                                      done_all
+                                    </span>
+                                    :
+                                    <span className="material-symbols-outlined text-white">
+                                      hourglass_empty
+                                    </span>
+                                }
+                              </div>
+                              <div>
+                                {v.title}
+                                <div style={{ fontSize: '10px' }} className='text-muted mt-1'>{v?.date}</div>
+                              </div>
                             </div>
                           </Accordion.Header>
                           <Accordion.Body className='d-block text-start'>
                             {v.description}
                             <div className='text-end'>
+                              <span className="me-2 pointer" onClick={() => onHandleFinishTask(v, index)}>
+                                {
+                                  v.finished ?
+                                    <span className="material-symbols-outlined">
+                                      close
+                                    </span>
+                                    :
+                                    <span className="material-symbols-outlined">
+                                      done_outline
+                                    </span>
+                                }
+                              </span>
                               <span
                                 onClick={() => {
                                   settitle(v.title)
@@ -110,10 +146,9 @@ const Home = () => {
                                   settitleButtonRight(("Edit todo"))
                                   setidEdit(index)
                                 }}
-                                className="material-symbols-outlined pointer">
+                                className="material-symbols-outlined pointer me-2">
                                 edit
                               </span>
-                              &nbsp;
                               <span onClick={() => onHandleDelete(index)} className="material-symbols-outlined pointer">
                                 delete
                               </span>
